@@ -44,7 +44,7 @@ function Load-Tab {
     param([string]$tabName)
 
     $mainPanel.Controls.Clear()
-    $lblTitle.Text = "Optimizer | $($tabName.ToUpper())"
+    $lblTitle.Text = "Optimizer | $($tabName.ToUpper()) | Under Develepment"
 
     $loadingLabel = New-Object System.Windows.Forms.Label
     $loadingLabel.Text = "Loading $tabName..."
@@ -103,7 +103,7 @@ $form.Controls.Add($header)
 
 # ─── Header Label ─────────────────────────────────────────────────────
 $lblTitle = New-Object System.Windows.Forms.Label
-$lblTitle.Text = "Optimizer | DASHBOARD"
+$lblTitle.Text = "Optimizer | DASHBOARD | Under Develepment"
 $lblTitle.ForeColor = [System.Drawing.Color]::White
 $lblTitle.Font = New-Object System.Drawing.Font("Segoe UI", 16, [System.Drawing.FontStyle]::Bold)
 $lblTitle.AutoSize = $true
