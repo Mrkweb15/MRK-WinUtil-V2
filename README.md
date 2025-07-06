@@ -1,45 +1,72 @@
-# 🛠️ WinUtil - Windows Maintenance & Utility Toolkit
+# 🛠️ WinUtil - Windows Maintenance & Utility Toolkit (v2.0)
 
-![WinUtil Preview](assets/preview.png)
+![WinUtil Preview](assets/Preview.png)
 
-**WinUtil** is a powerful, lightweight Windows utility tool written in PowerShell Shell Script. It automates essential system maintenance tasks and offers a one-click solution for cleaning, optimizing, and customizing Windows systems — perfect for power users, IT professionals, or everyday users looking to keep their machines running smoothly.
-
----
-
-## ⚙️ Features
-
-- 🧹 **System Cleanup**
-  - Clears temporary files, logs, and unnecessary cache
-  - Empties Recycle Bin and recent file history
-
-- 🧪 **Diagnostics & Fixes**
-  - Runs SFC and DISM for system file and health repair
-  - Network reset and DNS flush
-
-- 🔧 **Tweaks & Optimizations**
-  - Disable telemetry, ads, and unnecessary background services
-  - Debloat Windows with optional component removal
-
-- 💾 **Software Installer**
-  - Automatically installs essential tools (e.g., Chrome, 7zip, VS Code, etc.)
-
-- 🔒 **Privacy Hardening**
-  - Blocks tracking servers via HOSTS file
-  - Removes Cortana, OneDrive, and other telemetry sources (optional)
+**WinUtil v2.0** is a comprehensive PowerShell-based utility that automates Windows maintenance, optimization, and customization tasks. Designed for both technical users and beginners, it provides a streamlined way to keep your system clean, fast, and secure.
 
 ---
 
-## 📦 Getting Started
+## 🚀 What's New in Version 2.0
+- **Completely rewritten codebase** for better performance and reliability
+- **Enhanced UI/UX** with improved progress tracking and visual feedback
+- **New module system** allowing for easier feature expansion
+- **Improved error handling** and logging capabilities
+- **Expanded software library** with more popular applications
+- **Additional privacy controls** and Windows 11-specific optimizations
 
-### ✅ Prerequisites
+---
 
-- Windows 10 / 11
-- Admin privileges
-- PowerShell (v5.1+ or Windows PowerShell Core)
+## ⚙️ Core Features
 
-### 💻 Installation
+### 🧹 System Maintenance
+- Deep clean temporary files, logs, and cache locations
+- Clear Recycle Bin and file history
+- Remove Windows Update cache and error reports
+- Disk cleanup and optimization
 
-Copy code to the powershell:
+### 🛠️ Repair Tools
+- Automated SFC / DISM system file repair
+- Windows Update troubleshooting
+- Network reset (TCP/IP, DNS, Winsock)
+- Driver verification and repair
 
-```bash
+### ⚡ Performance Tweaks
+- Disable background apps and telemetry
+- Optimize startup programs and services
+- Adjust visual effects for performance
+- SSD optimization tweaks
+
+### 🔒 Privacy & Security
+- Disable tracking and data collection
+- Block telemetry servers via HOSTS file
+- Remove Cortana, OneDrive (optional)
+- Configure Windows Defender settings
+
+### 📦 Software Management
+- One-click install for popular apps:
+  - Browsers (Chrome, Firefox, Edge)
+  - Utilities (7-Zip, WinRAR, Notepad++)
+  - Dev tools (VS Code, Git, Python)
+  - Media players (VLC, Spotify)
+
+### 🎛️ Windows Customization
+- Context menu tweaks
+- Explorer UI adjustments
+- Taskbar and Start menu customization
+- Dark mode and accent color controls
+
+---
+
+## 📥 Installation & Usage
+
+### ✅ Requirements
+- Windows 10/11 (64-bit recommended)
+- Administrator privileges
+- PowerShell 5.1+ (included in Windows 10/11)
+- Internet connection (for some features)
+
+### ⚡ Quick Start
+Run this command in PowerShell (Admin):
+
+```powershell
 irm tinyurl.com/Mrk-WinUtil-V2 | iex
