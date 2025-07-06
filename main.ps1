@@ -282,7 +282,7 @@ if (Test-Path $githubIconPath) {
 }
 
 $githubButton.Add_Click({
-    Start-Process "https://github.com/yourusername/yourrepository"
+    Start-Process "https://github.com/Mrkweb15/MRK-WinUtil-V2"
 })
 $sidebarFooter.Controls.Add($githubButton)
 
