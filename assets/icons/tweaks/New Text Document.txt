@@ -1,0 +1,7 @@
+restore.png
+dns.png
+search.png
+location.png
+teredo.png
+sleep.png
+performance.png

@@ -1,0 +1,7 @@
+assets/icons/dashboard/
+├── cpu.png
+├── gpu.png
+├── memory.png
+├── system.png
+├── storage.png
+├── optimizations.png

@@ -1,0 +1,9 @@
+taskmgr.png
+device.png
+disk.png
+sysinfo.png
+cmd.png
+registry.png
+services.png
+control.png
+properties.png

@@ -1,0 +1,9 @@
+assets/
+└── icons/
+    └── cleaner/
+        ├── trash.png
+        ├── rocket.png
+        ├── recycle.png
+        ├── brain.png
+        ├── folder.png
+        └── globe.png
