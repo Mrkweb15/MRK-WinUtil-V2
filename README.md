@@ -4,6 +4,8 @@
 
 **WinUtil v2.0** is a comprehensive PowerShell-based utility that automates Windows maintenance, optimization, and customization tasks. Designed for both technical users and beginners, it provides a streamlined way to keep your system clean, fast, and secure.
 
+> 📜 **Previous Version**: [WinUtil v1.0](https://github.com/Mrkweb15/mrkwebWinutil) (Legacy version)
+> 
 ---
 
 ## 🚀 What's New in Version 2.0
