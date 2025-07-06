@@ -3,7 +3,7 @@ Add-Type -AssemblyName System.Drawing
 
 # ─── Tab file locations ─────────────────────────────────────────────────────
 $tabFiles = [ordered]@{
-    "Dashboard" = ".\tabs\Dashboard.ps1"
+    "Dashboard" = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/refs/heads/main/tabs/Dashboard.ps1"
     "Tweaks"    = ".\tabs\Tweaks.ps1"
     "Cleaner"   = ".\tabs\Cleaner.ps1"
     "Backup"    = ".\tabs\Backup.ps1"
