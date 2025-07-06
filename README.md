@@ -65,7 +65,7 @@
 - Windows 10/11 (64-bit recommended)
 - Administrator privileges
 - PowerShell 5.1+ (included in Windows 10/11)
-- Internet connection (for some features)
+- Internet connection
 
 ### ⚡ Quick Start
 Run this command in PowerShell (Admin):
