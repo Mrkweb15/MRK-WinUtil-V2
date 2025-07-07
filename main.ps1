@@ -2,13 +2,15 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 # ─── Tab file locations ─────────────────────────────────────────────────────
+$baseUrl = 'https://raw.githubusercontent.com/username/repo-name/main/tabs'
+
 $tabFiles = [ordered]@{
-    "Dashboard" = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/refs/heads/main/tabs/Dashboard.ps1"
-    "Tweaks"    = ".\tabs\Tweaks.ps1"
-    "Cleaner"   = ".\tabs\Cleaner.ps1"
-    "Backup"    = ".\tabs\Backup.ps1"
-    "Utilities" = ".\tabs\Utilities.ps1"
-    "Apps"      = ".\tabs\Apps.ps1"
+    "Dashboard" = "$baseUrl/Dashboard.ps1"
+    "Tweaks"    = "$baseUrl/Tweaks.ps1"
+    "Cleaner"   = "$baseUrl/Cleaner.ps1"
+    "Backup"    = "$baseUrl/Backup.ps1"
+    "Utilities" = "$baseUrl/Utilities.ps1"
+    "Apps"      = "$baseUrl/Apps.ps1"
 }
 
 # ─── Local icon paths ─────────────────────────────────────────────────────
