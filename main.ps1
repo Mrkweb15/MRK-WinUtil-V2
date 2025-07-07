@@ -8,12 +8,12 @@ $githubBase = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main"
 
 # ─── Tab file GitHub raw URLs ────────────────────────────────────────
 $tabFiles = [ordered]@{
-    "Dashboard" = "$githubBase/tabs/Dashboard.ps1"
-    "Tweaks"    = "$githubBase/tabs/Tweaks.ps1"
-    "Cleaner"   = "$githubBase/tabs/Cleaner.ps1"
-    "Backup"    = "$githubBase/tabs/Backup.ps1"
-    "Utilities" = "$githubBase/tabs/Utilities.ps1"
-    "Apps"      = "$githubBase/tabs/Apps.ps1"
+    "Dashboard" = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs/Dashboard.ps1"
+    "Tweaks"    = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs/Tweaks.ps1"
+    "Cleaner"   = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs/Cleaner.ps1"
+    "Backup"    = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs/Backup.ps1"
+    "Utilities" = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs/Utilities.ps1"
+    "Apps"      = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs/Apps.ps1"
 }
 
 # ─── Icon GitHub raw URLs ─────────────────────────────────────────────
@@ -78,8 +78,11 @@ function Load-Tab {
     if ($tabFiles[$tabName]) {
         try {
             $tempFile = New-TemporaryFile
-            Invoke-WebRequest -Uri $tabFiles[$tabName] -OutFile $tempFile.FullName
+            Invoke-WebRequest -Uri $tabFiles[$tabName] -OutFile $tempFile.FullName -UseBasicParsing
+
+            # "Dot source" the downloaded file so it runs and returns $panel
             $tabPanel = . $tempFile.FullName
+
             Remove-Item $tempFile.FullName -Force
 
             if ($tabPanel -is [System.Windows.Forms.Panel]) {
@@ -92,6 +95,8 @@ function Load-Tab {
         } catch {
             [System.Windows.Forms.MessageBox]::Show("Error loading tab '$tabName': $_", "Error", "OK", "Error")
         }
+    } else {
+        [System.Windows.Forms.MessageBox]::Show("File not found: $tabName", "Error", "OK", "Error")
     }
 }
 
