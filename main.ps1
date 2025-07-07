@@ -44,7 +44,7 @@ function Load-Tab {
     param([string]$tabName)
 
     $mainPanel.Controls.Clear()
-    $lblTitle.Text = "Optimizer | $($tabName.ToUpper()) | Under Develepment"
+    $lblTitle.Text = "Optimizer | $($tabName.ToUpper()) | Under Development"
 
     $loadingLabel = New-Object System.Windows.Forms.Label
     $loadingLabel.Text = "Loading $tabName..."
@@ -58,23 +58,36 @@ function Load-Tab {
 
     Start-Sleep -Milliseconds 300
 
-    if ($tabFiles[$tabName] -ne $null) {
-        $file = $tabFiles[$tabName]
-        if (Test-Path $file) {
-            try {
-                $tabPanel = & $file
-                if ($tabPanel -is [System.Windows.Forms.Panel]) {
-                    $mainPanel.Controls.Clear()
-                    $tabPanel.Dock = 'Fill'
-                    $mainPanel.Controls.Add($tabPanel)
-                } else {
-                    [System.Windows.Forms.MessageBox]::Show("Tab '$tabName' did not return a valid Panel.", "Error", "OK", "Error")
-                }
-            } catch {
-                [System.Windows.Forms.MessageBox]::Show("Error loading tab '$tabName': $_", "Error", "OK", "Error")
+    $file = $tabFiles[$tabName]
+    if (Test-Path $file) {
+        try {
+            $tabPanel = & $file
+            if ($tabPanel -is [System.Windows.Forms.Panel]) {
+                $mainPanel.Controls.Clear()
+                $tabPanel.Dock = 'Fill'
+                $mainPanel.Controls.Add($tabPanel)
+            } else {
+                [System.Windows.Forms.MessageBox]::Show("Tab '$tabName' did not return a valid Panel.", "Error", "OK", "Error")
             }
-        } else {
-            [System.Windows.Forms.MessageBox]::Show("File not found: $file", "Error", "OK", "Error")
+        } catch {
+            [System.Windows.Forms.MessageBox]::Show("Error loading tab '$tabName': $_", "Error", "OK", "Error")
+        }
+    } else {
+        # Try to download from GitHub if not found locally
+        $rawBase = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs"
+        $remoteUrl = "$rawBase/$tabName.ps1"
+        try {
+            $scriptContent = Invoke-RestMethod -Uri $remoteUrl -UseBasicParsing
+            $tabPanel = Invoke-Expression $scriptContent
+            if ($tabPanel -is [System.Windows.Forms.Panel]) {
+                $mainPanel.Controls.Clear()
+                $tabPanel.Dock = 'Fill'
+                $mainPanel.Controls.Add($tabPanel)
+            } else {
+                [System.Windows.Forms.MessageBox]::Show("Tab '$tabName' from GitHub did not return a valid Panel.", "Error", "OK", "Error")
+            }
+        } catch {
+            [System.Windows.Forms.MessageBox]::Show("Failed to load '$tabName' tab locally or from GitHub.`n$_", "Error", "OK", "Error")
         }
     }
 }
