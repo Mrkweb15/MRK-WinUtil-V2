@@ -40,11 +40,12 @@ function Set-ActiveNavButton {
     $global:activeNavButton = $button
 }
 
+# Original Load-Tab now inlined to avoid external file loading
 function Load-Tab {
     param([string]$tabName)
 
     $mainPanel.Controls.Clear()
-    $lblTitle.Text = "Optimizer | $($tabName.ToUpper()) | Under Develepment"
+    $lblTitle.Text = "Optimizer | $($tabName.ToUpper())"
 
     $loadingLabel = New-Object System.Windows.Forms.Label
     $loadingLabel.Text = "Loading $tabName..."
@@ -58,26 +59,103 @@ function Load-Tab {
 
     Start-Sleep -Milliseconds 300
 
-    if ($tabFiles[$tabName] -ne $null) {
-        $file = $tabFiles[$tabName]
-        if (Test-Path $file) {
-            try {
-                $tabPanel = & $file
-                if ($tabPanel -is [System.Windows.Forms.Panel]) {
-                    $mainPanel.Controls.Clear()
-                    $tabPanel.Dock = 'Fill'
-                    $mainPanel.Controls.Add($tabPanel)
-                } else {
-                    [System.Windows.Forms.MessageBox]::Show("Tab '$tabName' did not return a valid Panel.", "Error", "OK", "Error")
-                }
-            } catch {
-                [System.Windows.Forms.MessageBox]::Show("Error loading tab '$tabName': $_", "Error", "OK", "Error")
-            }
-        } else {
-            [System.Windows.Forms.MessageBox]::Show("File not found: $file", "Error", "OK", "Error")
+    $mainPanel.Controls.Clear()
+
+    switch ($tabName) {
+        "Dashboard" {
+            # Dashboard Panel Code Here
+            $dashboardPanel = New-Object System.Windows.Forms.Panel
+            $dashboardPanel.Dock = 'Fill'
+            $dashboardPanel.BackColor = [System.Drawing.Color]::FromArgb(17, 24, 39)
+
+            $label = New-Object System.Windows.Forms.Label
+            $label.Text = "DASHBOARD CONTENT HERE"
+            $label.ForeColor = [System.Drawing.Color]::White
+            $label.Font = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
+            $label.AutoSize = $true
+            $label.Location = [System.Drawing.Point]::new(50, 50)
+            $dashboardPanel.Controls.Add($label)
+            $mainPanel.Controls.Add($dashboardPanel)
+        }
+        "Tweaks" {
+            $tweakPanel = New-Object System.Windows.Forms.Panel
+            $tweakPanel.Dock = 'Fill'
+            $tweakPanel.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 40)
+
+            $label = New-Object System.Windows.Forms.Label
+            $label.Text = "TWEAKS CONTENT HERE"
+            $label.ForeColor = [System.Drawing.Color]::White
+            $label.Font = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
+            $label.AutoSize = $true
+            $label.Location = [System.Drawing.Point]::new(50, 50)
+            $tweakPanel.Controls.Add($label)
+            $mainPanel.Controls.Add($tweakPanel)
+        }
+        "Cleaner" {
+            $cleanerPanel = New-Object System.Windows.Forms.Panel
+            $cleanerPanel.Dock = 'Fill'
+            $cleanerPanel.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 50)
+
+            $label = New-Object System.Windows.Forms.Label
+            $label.Text = "CLEANER CONTENT HERE"
+            $label.ForeColor = [System.Drawing.Color]::White
+            $label.Font = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
+            $label.AutoSize = $true
+            $label.Location = [System.Drawing.Point]::new(50, 50)
+            $cleanerPanel.Controls.Add($label)
+            $mainPanel.Controls.Add($cleanerPanel)
+        }
+        "Backup" {
+            $backupPanel = New-Object System.Windows.Forms.Panel
+            $backupPanel.Dock = 'Fill'
+            $backupPanel.BackColor = [System.Drawing.Color]::FromArgb(25, 25, 45)
+
+            $label = New-Object System.Windows.Forms.Label
+            $label.Text = "BACKUP CONTENT HERE"
+            $label.ForeColor = [System.Drawing.Color]::White
+            $label.Font = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
+            $label.AutoSize = $true
+            $label.Location = [System.Drawing.Point]::new(50, 50)
+            $backupPanel.Controls.Add($label)
+            $mainPanel.Controls.Add($backupPanel)
+        }
+        "Utilities" {
+            $utilitiesPanel = New-Object System.Windows.Forms.Panel
+            $utilitiesPanel.Dock = 'Fill'
+            $utilitiesPanel.BackColor = [System.Drawing.Color]::FromArgb(30, 30, 50)
+
+            $label = New-Object System.Windows.Forms.Label
+            $label.Text = "UTILITIES CONTENT HERE"
+            $label.ForeColor = [System.Drawing.Color]::White
+            $label.Font = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
+            $label.AutoSize = $true
+            $label.Location = [System.Drawing.Point]::new(50, 50)
+            $utilitiesPanel.Controls.Add($label)
+            $mainPanel.Controls.Add($utilitiesPanel)
+        }
+        "Apps" {
+            $appsPanel = New-Object System.Windows.Forms.Panel
+            $appsPanel.Dock = 'Fill'
+            $appsPanel.BackColor = [System.Drawing.Color]::FromArgb(35, 35, 55)
+
+            $label = New-Object System.Windows.Forms.Label
+            $label.Text = "APPS CONTENT HERE"
+            $label.ForeColor = [System.Drawing.Color]::White
+            $label.Font = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
+            $label.AutoSize = $true
+            $label.Location = [System.Drawing.Point]::new(50, 50)
+            $appsPanel.Controls.Add($label)
+            $mainPanel.Controls.Add($appsPanel)
+        }
+        default {
+            $defaultPanel = New-Object System.Windows.Forms.Panel
+            $defaultPanel.Dock = 'Fill'
+            $defaultPanel.BackColor = [System.Drawing.Color]::Red
+            $mainPanel.Controls.Add($defaultPanel)
         }
     }
 }
+
 
 # ─── Main Form ─────────────────────────────────────────────────────
 $form = New-Object System.Windows.Forms.Form
