@@ -276,74 +276,721 @@ function Load-Tab {
 
         }
         "Tweaks" {
-            $tweakPanel = New-Object System.Windows.Forms.Panel
-            $tweakPanel.Dock = 'Fill'
-            $tweakPanel.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 40)
+            Add-Type -AssemblyName System.Windows.Forms
+            Add-Type -AssemblyName System.Drawing
+            
+            $panel = New-Object System.Windows.Forms.Panel
+            $panel.Dock = 'Fill'
+            $panel.BackColor = [System.Drawing.Color]::FromArgb(30, 30, 47)
+            $panel.AutoScroll = $true
+            
+            # Icon paths for each tweak (ensure these exist)
+            $iconPaths = @{
+                "Create Restore Point"     = "assets/icons/tweaks/restore.png"
+                "Clear DNS Cache"          = "assets/icons/tweaks/dns.png"
+                "Toggle Search Bar"        = "assets/icons/tweaks/search.png"
+                "Toggle Location Tracking" = "assets/icons/tweaks/location.png"
+                "Toggle Teredo"            = "assets/icons/tweaks/teredo.png"
+                "Toggle Hibernation"       = "assets/icons/tweaks/sleep.png"
+                "Performance Display Mode" = "assets/icons/tweaks/performance.png"
+            }
+            
+            # Descriptions for each tweak
+            $descriptions = @{
+                "Create Restore Point"     = "Create a system restore point before making changes."
+                "Clear DNS Cache"          = "Flushes the DNS resolver cache to fix browsing issues."
+                "Toggle Search Bar"        = "Show or hide the taskbar search box on Windows."
+                "Toggle Location Tracking" = "Enable or disable location tracking by the system."
+                "Toggle Teredo"            = "Manage Teredo tunneling used for IPv6 connectivity."
+                "Toggle Hibernation"       = "Turn system hibernation on or off."
+                "Performance Display Mode" = "Open environment settings to adjust performance."
+            }
+            
+            function New-TweakCard {
+                param (
+                    [string]$title,
+                    [string]$buttonText,
+                    [System.Drawing.Point]$location,
+                    [ScriptBlock]$onClick,
+                    [bool]$isToggle = $false,
+                    [string]$iconPath,
+                    [string]$description
+                )
+            
+                $card = New-Object System.Windows.Forms.Panel
+                $card.Size = New-Object System.Drawing.Size(270, 140)
+                $card.Location = $location
+                $card.BackColor = [System.Drawing.Color]::FromArgb(45, 45, 65)
+            
+                # Rounded corners
+                $radius = 12
+                $path = New-Object System.Drawing.Drawing2D.GraphicsPath
+                $path.AddArc(0, 0, $radius, $radius, 180, 90)
+                $path.AddArc($card.Width - $radius, 0, $radius, $radius, 270, 90)
+                $path.AddArc($card.Width - $radius, $card.Height - $radius, $radius, $radius, 0, 90)
+                $path.AddArc(0, $card.Height - $radius, $radius, $radius, 90, 90)
+                $path.CloseAllFigures()
+                $card.Region = New-Object System.Drawing.Region($path)
+            
+                # Icon
+                $pic = New-Object System.Windows.Forms.PictureBox
+                $pic.Size = New-Object System.Drawing.Size(24, 24)
+                $pic.Location = New-Object System.Drawing.Point(10, 10)
+                $pic.SizeMode = 'StretchImage'
+                if (Test-Path $iconPath) {
+                    $pic.Image = [System.Drawing.Image]::FromFile($iconPath)
+                }
+            
+                # Title label
+                $label = New-Object System.Windows.Forms.Label
+                $label.Text = $title
+                $label.ForeColor = [System.Drawing.Color]::White
+                $label.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
+                $label.Location = New-Object System.Drawing.Point(40, 12)
+                $label.AutoSize = $true
+            
+                # Description label
+                $desc = New-Object System.Windows.Forms.Label
+                $desc.Text = $description
+                $desc.ForeColor = [System.Drawing.Color]::LightGray
+                $desc.Font = New-Object System.Drawing.Font("Segoe UI", 8)
+                $desc.Size = New-Object System.Drawing.Size(250, 32)
+                $desc.Location = New-Object System.Drawing.Point(10, 42)
+            
+                if ($isToggle) {
+                    $toggle = New-Object System.Windows.Forms.CheckBox
+                    $toggle.Appearance = 'Button'
+                    $toggle.FlatStyle = 'Flat'
+                    $toggle.FlatAppearance.BorderSize = 0
+                    $toggle.Text = "OFF"
+                    $toggle.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
+                    $toggle.BackColor = [System.Drawing.Color]::FromArgb(80, 80, 90)
+                    $toggle.ForeColor = [System.Drawing.Color]::White
+                    $toggle.Size = New-Object System.Drawing.Size(130, 35)
+                    $toggle.Location = New-Object System.Drawing.Point(70, 95)
+            
+                    $toggle.Add_CheckedChanged({
+                        if ($toggle.Checked) {
+                            $toggle.Text = "ON"
+                            $toggle.BackColor = [System.Drawing.Color]::FromArgb(90, 160, 100)
+                        } else {
+                            $toggle.Text = "OFF"
+                            $toggle.BackColor = [System.Drawing.Color]::FromArgb(80, 80, 90)
+                        }
+                        if ($onClick) { & $onClick }
+                    })
+            
+                    $card.Controls.AddRange(@($pic, $label, $desc, $toggle))
+                } else {
+                    $btn = New-Object System.Windows.Forms.Button
+                    $btn.Text = $buttonText
+                    $btn.Size = New-Object System.Drawing.Size(130, 35)
+                    $btn.Location = New-Object System.Drawing.Point(70, 95)
+                    $btn.FlatStyle = 'Flat'
+                    $btn.FlatAppearance.BorderSize = 0
+                    $btn.BackColor = [System.Drawing.Color]::FromArgb(70, 100, 150)
+                    $btn.ForeColor = [System.Drawing.Color]::White
+                    $btn.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
+            
+                    $btn.Add_MouseEnter({ $btn.BackColor = [System.Drawing.Color]::FromArgb(90, 120, 180) })
+                    $btn.Add_MouseLeave({ $btn.BackColor = [System.Drawing.Color]::FromArgb(70, 100, 150) })
+            
+                    if ($onClick) { $btn.Add_Click($onClick) }
+            
+                    $card.Controls.AddRange(@($pic, $label, $desc, $btn))
+                }
+            
+                return $card
+            }
+            
+            # Tweaks definitions
+            $tweaks = @(
+                @{ Title = "Create Restore Point";     Btn = "Create";   Action = { Write-Host "Restore Point created" }; IsToggle = $false },
+                @{ Title = "Clear DNS Cache";          Btn = "Clear";    Action = { ipconfig /flushdns | Out-Null }; IsToggle = $false },
+                @{ Title = "Toggle Search Bar";        Btn = "Toggle";   Action = { Write-Host "Toggled search bar" }; IsToggle = $true },
+                @{ Title = "Toggle Location Tracking"; Btn = "Toggle";   Action = { Write-Host "Toggled location tracking" }; IsToggle = $true },
+                @{ Title = "Toggle Teredo";            Btn = "Toggle";   Action = { Write-Host "Toggled Teredo" }; IsToggle = $true },
+                @{ Title = "Toggle Hibernation";       Btn = "Toggle";   Action = { powercfg -h toggle }; IsToggle = $true },
+                @{ Title = "Performance Display Mode"; Btn = "Apply";    Action = { rundll32.exe sysdm.cpl,EditEnvironmentVariables }; IsToggle = $false }
+            )
+            
+            # Layout positions
+            $startX = 20
+            $startY = 20
+            $gapX = 20
+            $gapY = 20
+            $cols = 3
+            $row = 0
+            $col = 0
+            
+            foreach ($tweak in $tweaks) {
+                $x = $startX + ($col * (270 + $gapX))
+                $y = $startY + ($row * (140 + $gapY))
+                $icon = $iconPaths[$tweak.Title]
+                $desc = $descriptions[$tweak.Title]
+            
+                $card = New-TweakCard -title $tweak.Title -buttonText $tweak.Btn -location ([System.Drawing.Point]::new($x, $y)) -onClick $tweak.Action -isToggle:$tweak.IsToggle -iconPath $icon -description $desc
+                $panel.Controls.Add($card)
+            
+                $col++
+                if ($col -ge $cols) {
+                    $col = 0
+                    $row++
+                }
+            }
+            
+            return $panel
 
-            $label = New-Object System.Windows.Forms.Label
-            $label.Text = "TWEAKS CONTENT HERE"
-            $label.ForeColor = [System.Drawing.Color]::White
-            $label.Font = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
-            $label.AutoSize = $true
-            $label.Location = [System.Drawing.Point]::new(50, 50)
-            $tweakPanel.Controls.Add($label)
-            $mainPanel.Controls.Add($tweakPanel)
         }
         "Cleaner" {
-            $cleanerPanel = New-Object System.Windows.Forms.Panel
-            $cleanerPanel.Dock = 'Fill'
-            $cleanerPanel.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 50)
+            Add-Type -AssemblyName System.Windows.Forms
+            Add-Type -AssemblyName System.Drawing
+            
+            $panel = New-Object System.Windows.Forms.Panel
+            $panel.Dock = 'Fill'
+            $panel.BackColor = [System.Drawing.Color]::FromArgb(37, 37, 55)
+            $panel.AutoScroll = $true
+            
+            # Icon mapping (local PNG files)
+            $iconPaths = @{
+                "Temp Files"        = "assets/icons/cleaner/trash.png"
+                "Prefetch Files"    = "assets/icons/cleaner/rocket.png"
+                "Recycle Bin"       = "assets/icons/cleaner/recycle.png"
+                "Memory Standby"    = "assets/icons/cleaner/brain.png"
+                "Software Dist"     = "assets/icons/cleaner/folder.png"
+                "DNS Cache"         = "assets/icons/cleaner/globe.png"
+            }
+            
+            function New-CleanerCard {
+                param (
+                    [string]$title,
+                    [string]$description,
+                    [ScriptBlock]$onClick,
+                    [System.Drawing.Point]$location,
+                    [string]$iconPath
+                )
+            
+                $card = New-Object System.Windows.Forms.Panel
+                $card.Size = New-Object System.Drawing.Size(270, 130)
+                $card.Location = $location
+                $card.BackColor = [System.Drawing.Color]::FromArgb(48, 48, 65)
+            
+                # Rounded Corners
+                $radius = 10
+                $path = New-Object System.Drawing.Drawing2D.GraphicsPath
+                $path.AddArc(0, 0, $radius, $radius, 180, 90)
+                $path.AddArc($card.Width - $radius, 0, $radius, $radius, 270, 90)
+                $path.AddArc($card.Width - $radius, $card.Height - $radius, $radius, $radius, 0, 90)
+                $path.AddArc(0, $card.Height - $radius, $radius, $radius, 90, 90)
+                $path.CloseAllFigures()
+                $card.Region = New-Object System.Drawing.Region($path)
+            
+                # Load icon image
+                $pic = New-Object System.Windows.Forms.PictureBox
+                $pic.Size = New-Object System.Drawing.Size(32, 32)
+                $pic.Location = New-Object System.Drawing.Point(10, 10)
+                $pic.SizeMode = 'StretchImage'
+                if (Test-Path $iconPath) {
+                    try {
+                        $img = [System.Drawing.Image]::FromFile($iconPath)
+                        $pic.Image = $img
+                    } catch {
+                        Write-Warning "Could not load image: $iconPath"
+                    }
+                }
+            
+                # Title label
+                $lblTitle = New-Object System.Windows.Forms.Label
+                $lblTitle.Text = $title
+                $lblTitle.ForeColor = [System.Drawing.Color]::White
+                $lblTitle.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
+                $lblTitle.Location = New-Object System.Drawing.Point(50, 12)
+                $lblTitle.AutoSize = $true
+            
+                # Description label
+                $lblDesc = New-Object System.Windows.Forms.Label
+                $lblDesc.Text = $description
+                $lblDesc.ForeColor = [System.Drawing.Color]::LightGray
+                $lblDesc.Font = New-Object System.Drawing.Font("Segoe UI", 9)
+                $lblDesc.Size = New-Object System.Drawing.Size(250, 40)
+                $lblDesc.Location = New-Object System.Drawing.Point(10, 50)
+            
+                # Button
+                $btn = New-Object System.Windows.Forms.Button
+                $btn.Text = "Run"
+                $btn.Size = New-Object System.Drawing.Size(80, 30)
+                $btn.Location = New-Object System.Drawing.Point(170, 90)
+                $btn.BackColor = [System.Drawing.Color]::FromArgb(90, 130, 190)
+                $btn.FlatStyle = 'Flat'
+                $btn.FlatAppearance.BorderSize = 0
+                $btn.ForeColor = [System.Drawing.Color]::White
+                $btn.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
+            
+                $btn.Add_Click($onClick)
+            
+                $card.Controls.AddRange(@($pic, $lblTitle, $lblDesc, $btn))
+                return $card
+            }
+            
+            # Cleaner Options
+            $cleaners = @(
+                @{
+                    Title = "Temp Files"; Desc = "Removes temporary files."; Act = {
+                        Remove-Item "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
+                    }
+                },
+                @{
+                    Title = "Prefetch Files"; Desc = "Cleans prefetch cache."; Act = {
+                        Remove-Item "$env:SystemRoot\Prefetch\*" -Recurse -Force -ErrorAction SilentlyContinue
+                    }
+                },
+                @{
+                    Title = "Recycle Bin"; Desc = "Empties the Recycle Bin."; Act = {
+                        (New-Object -ComObject Shell.Application).NameSpace(0x0a).Items() | ForEach-Object {
+                            Remove-Item $_.Path -Recurse -Force -ErrorAction SilentlyContinue
+                        }
+                    }
+                },
+                @{
+                    Title = "Memory Standby"; Desc = "Flushes standby list."; Act = {
+                        Start-Process -FilePath "empty.exe" -NoNewWindow
+                    }
+                },
+                @{
+                    Title = "Software Dist"; Desc = "Cleans update cache."; Act = {
+                        Stop-Service wuauserv -Force
+                        Remove-Item "$env:SystemRoot\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction SilentlyContinue
+                        Start-Service wuauserv
+                    }
+                },
+                @{
+                    Title = "DNS Cache"; Desc = "Flushes DNS resolver."; Act = {
+                        ipconfig /flushdns | Out-Null
+                    }
+                }
+            )
+            
+            # Layout
+            $startX = 20
+            $startY = 20
+            $gapX = 20
+            $gapY = 20
+            $cols = 3
+            $row = 0
+            $col = 0
+            
+            foreach ($c in $cleaners) {
+                $x = $startX + ($col * (270 + $gapX))
+                $y = $startY + ($row * (130 + $gapY))
+                $iconFile = $iconPaths[$c.Title]
+                $card = New-CleanerCard -title $c.Title -description $c.Desc -onClick $c.Act -location ([System.Drawing.Point]::new($x, $y)) -iconPath $iconFile
+                $panel.Controls.Add($card)
+            
+                $col++
+                if ($col -ge $cols) {
+                    $col = 0
+                    $row++
+                }
+            }
+            
+            return $panel
 
-            $label = New-Object System.Windows.Forms.Label
-            $label.Text = "CLEANER CONTENT HERE"
-            $label.ForeColor = [System.Drawing.Color]::White
-            $label.Font = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
-            $label.AutoSize = $true
-            $label.Location = [System.Drawing.Point]::new(50, 50)
-            $cleanerPanel.Controls.Add($label)
-            $mainPanel.Controls.Add($cleanerPanel)
         }
         "Backup" {
-            $backupPanel = New-Object System.Windows.Forms.Panel
-            $backupPanel.Dock = 'Fill'
-            $backupPanel.BackColor = [System.Drawing.Color]::FromArgb(25, 25, 45)
+            $panel = New-Object System.Windows.Forms.Panel
+            $panel.Dock = 'Fill'
+            $panel.BackColor = [System.Drawing.Color]::FromArgb(37, 37, 55)
+            
+            # ── Layout Settings ─────────────────────────────
+            $panelPadding = 20
+            $cardWidth = 880
+            $cardHeight = 160
+            $gapY = 20
+            $startY = $panelPadding
+            $cardFont = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
+            $descFont = New-Object System.Drawing.Font("Segoe UI", 9)
+            $cardBack = [System.Drawing.Color]::FromArgb(50, 50, 70)
+            $cardFore = [System.Drawing.Color]::White
+            
+            # ── Backup Options with Detailed Info ──────────────────────
+            $backupOptions = @(
+                @{
+                    Title = "System Restore Point"
+                    Description = "Create a system restore point which allows rolling back Windows settings and system files to a previous working state. Useful before major updates or installs."
+                    Steps = "1. Click 'Create' to make a restore point with current system config.`n2. If issues occur, click 'Restore' to go back to this state.`n3. Restore Points do not affect personal files."
+                    CreateAction = { [System.Windows.Forms.MessageBox]::Show("Creating restore point... (System protection must be enabled)") }
+                    RestoreAction = { [System.Windows.Forms.MessageBox]::Show("Launching system restore wizard...") }
+                },
+                @{
+                    Title = "Full OS Backup (to USB)"
+                    Description = "Create a full image backup of your Windows installation to an external USB drive. Restoring from this image can recover your OS in case of system corruption or disk failure."
+                    Steps = "1. Connect a USB drive with sufficient space.`n2. Click 'Create' to initiate full system image backup.`n3. To restore, boot using recovery media and click 'Restore'."
+                    CreateAction = { [System.Windows.Forms.MessageBox]::Show("Starting full system image backup wizard...") }
+                    RestoreAction = { [System.Windows.Forms.MessageBox]::Show("Please boot to Windows recovery to restore the image.") }
+                },
+                @{
+                    Title = "Personal Data Backup (to USB)"
+                    Description = "Backs up selected folders (Documents, Desktop, Downloads, etc.) to a USB drive. Helps you secure important files before system maintenance or reset."
+                    Steps = "1. Connect a USB drive.`n2. Click 'Create' to copy personal files.`n3. Use 'Restore' to copy files back to original locations."
+                    CreateAction = { [System.Windows.Forms.MessageBox]::Show("Starting file backup process...") }
+                    RestoreAction = { [System.Windows.Forms.MessageBox]::Show("Restoring personal files...") }
+                }
+            )
+            
+            # ── Render Cards Horizontally ───────────────────────────
+            for ($i = 0; $i -lt $backupOptions.Count; $i++) {
+                $opt = $backupOptions[$i]
+                $y = $startY + $i * ($cardHeight + $gapY)
+            
+                $card = New-Object System.Windows.Forms.Panel
+                $card.Size = New-Object System.Drawing.Size($cardWidth, $cardHeight)
+                $card.Location = New-Object System.Drawing.Point(20, $y)
+                $card.BackColor = $cardBack
+                $card.BorderStyle = 'FixedSingle'
+            
+                # Title
+                $title = New-Object System.Windows.Forms.Label
+                $title.Text = $opt.Title
+                $title.Font = $cardFont
+                $title.ForeColor = $cardFore
+                $title.AutoSize = $true
+                $title.Location = New-Object System.Drawing.Point(10, 10)
+                $card.Controls.Add($title)
+            
+                # Description
+                $desc = New-Object System.Windows.Forms.Label
+                $desc.Text = $opt.Description
+                $desc.Font = $descFont
+                $desc.ForeColor = $cardFore
+                $desc.AutoSize = $true
+                $desc.MaximumSize = New-Object System.Drawing.Size(720, 0)
+                $desc.Location = New-Object System.Drawing.Point(10, 35)
+                $card.Controls.Add($desc)
+            
+                # Step-by-step
+                $steps = New-Object System.Windows.Forms.Label
+                $steps.Text = $opt.Steps
+                $steps.Font = $descFont
+                $steps.ForeColor = [System.Drawing.Color]::LightGray
+                $steps.AutoSize = $true
+                $steps.MaximumSize = New-Object System.Drawing.Size(720, 0)
+                $steps.Location = New-Object System.Drawing.Point(10, 70)
+                $card.Controls.Add($steps)
+            
+                # Create Button
+                $createBtn = New-Object System.Windows.Forms.Button
+                $createBtn.Text = "Create"
+                $createBtn.Size = New-Object System.Drawing.Size(80, 30)
+                $createBtn.Location = New-Object System.Drawing.Point(770, 35)
+                $createBtn.BackColor = [System.Drawing.Color]::FromArgb(60, 140, 90)
+                $createBtn.ForeColor = [System.Drawing.Color]::White
+                $createBtn.FlatStyle = 'Flat'
+                $createBtn.FlatAppearance.BorderSize = 0
+                $createBtn.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
+                $createBtn.Add_Click($opt.CreateAction)
+                $card.Controls.Add($createBtn)
+            
+                # Restore Button
+                $restoreBtn = New-Object System.Windows.Forms.Button
+                $restoreBtn.Text = "Restore"
+                $restoreBtn.Size = New-Object System.Drawing.Size(80, 30)
+                $restoreBtn.Location = New-Object System.Drawing.Point(770, 75)
+                $restoreBtn.BackColor = [System.Drawing.Color]::FromArgb(180, 120, 60)
+                $restoreBtn.ForeColor = [System.Drawing.Color]::White
+                $restoreBtn.FlatStyle = 'Flat'
+                $restoreBtn.FlatAppearance.BorderSize = 0
+                $restoreBtn.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
+                $restoreBtn.Add_Click($opt.RestoreAction)
+                $card.Controls.Add($restoreBtn)
+            
+                $panel.Controls.Add($card)
+            }
+            
+            return $panel
 
-            $label = New-Object System.Windows.Forms.Label
-            $label.Text = "BACKUP CONTENT HERE"
-            $label.ForeColor = [System.Drawing.Color]::White
-            $label.Font = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
-            $label.AutoSize = $true
-            $label.Location = [System.Drawing.Point]::new(50, 50)
-            $backupPanel.Controls.Add($label)
-            $mainPanel.Controls.Add($backupPanel)
         }
         "Utilities" {
-            $utilitiesPanel = New-Object System.Windows.Forms.Panel
-            $utilitiesPanel.Dock = 'Fill'
-            $utilitiesPanel.BackColor = [System.Drawing.Color]::FromArgb(30, 30, 50)
+            Add-Type -AssemblyName System.Windows.Forms
+            Add-Type -AssemblyName System.Drawing
+            
+            $panel = New-Object System.Windows.Forms.Panel
+            $panel.Dock = 'Fill'
+            $panel.BackColor = [System.Drawing.Color]::FromArgb(50, 50, 70)
+            $panel.AutoScroll = $true
+            
+            # Utility definitions
+            $utilities = @(
+                @{ Title = "Task Manager";        Desc = "Monitor apps, processes, and system performance."; Cmd = "taskmgr"; Icon = "assets/icons/utils/taskmgr.png" },
+                @{ Title = "Device Manager";      Desc = "Manage and view hardware devices and drivers.";     Cmd = "devmgmt.msc"; Icon = "assets/icons/utils/device.png" },
+                @{ Title = "Disk Management";     Desc = "Create and format partitions and volumes.";         Cmd = "diskmgmt.msc"; Icon = "assets/icons/utils/disk.png" },
+                @{ Title = "System Information";  Desc = "Detailed overview of your system hardware.";        Cmd = "msinfo32"; Icon = "assets/icons/utils/sysinfo.png" },
+                @{ Title = "Command Prompt";      Desc = "Run command line tools and scripts.";               Cmd = "cmd.exe"; Icon = "assets/icons/utils/cmd.png" },
+                @{ Title = "Registry Editor";     Desc = "Edit advanced Windows settings via registry.";      Cmd = "regedit"; Icon = "assets/icons/utils/registry.png" },
+                @{ Title = "Services";            Desc = "View and manage running services.";                 Cmd = "services.msc"; Icon = "assets/icons/utils/services.png" },
+                @{ Title = "Control Panel";       Desc = "Access classic Windows control settings.";          Cmd = "control"; Icon = "assets/icons/utils/control.png" },
+                @{ Title = "System Properties";   Desc = "Advanced system settings and environment vars.";    Cmd = "SystemPropertiesAdvanced"; Icon = "assets/icons/utils/properties.png" }
+            )
+            
+            # Function to create each card
+            function New-UtilityCard {
+                param (
+                    [string]$title,
+                    [string]$description,
+                    [string]$command,
+                    [System.Drawing.Point]$location,
+                    [string]$iconPath
+                )
+            
+                $card = New-Object System.Windows.Forms.Panel
+                $card.Size = New-Object System.Drawing.Size(270, 130)
+                $card.Location = $location
+                $card.BackColor = [System.Drawing.Color]::FromArgb(60, 60, 85)
+            
+                # Rounded corner region
+                $radius = 10
+                $path = New-Object System.Drawing.Drawing2D.GraphicsPath
+                $path.AddArc(0, 0, $radius, $radius, 180, 90)
+                $path.AddArc($card.Width - $radius, 0, $radius, $radius, 270, 90)
+                $path.AddArc($card.Width - $radius, $card.Height - $radius, $radius, $radius, 0, 90)
+                $path.AddArc(0, $card.Height - $radius, $radius, $radius, 90, 90)
+                $path.CloseAllFigures()
+                $card.Region = New-Object System.Drawing.Region($path)
+            
+                # Icon
+                $icon = New-Object System.Windows.Forms.PictureBox
+                $icon.Size = New-Object System.Drawing.Size(24, 24)
+                $icon.Location = New-Object System.Drawing.Point(10, 10)
+                $icon.SizeMode = 'StretchImage'
+                if (Test-Path $iconPath) {
+                    $icon.Image = [System.Drawing.Image]::FromFile($iconPath)
+                }
+            
+                # Title
+                $titleLabel = New-Object System.Windows.Forms.Label
+                $titleLabel.Text = $title
+                $titleLabel.ForeColor = [System.Drawing.Color]::White
+                $titleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
+                $titleLabel.Location = New-Object System.Drawing.Point(40, 12)
+                $titleLabel.AutoSize = $true
+            
+                # Description
+                $descLabel = New-Object System.Windows.Forms.Label
+                $descLabel.Text = $description
+                $descLabel.ForeColor = [System.Drawing.Color]::LightGray
+                $descLabel.Font = New-Object System.Drawing.Font("Segoe UI", 8)
+                $descLabel.Size = New-Object System.Drawing.Size(250, 32)
+                $descLabel.Location = New-Object System.Drawing.Point(10, 42)
+            
+                # Launch Button
+                $btn = New-Object System.Windows.Forms.Button
+                $btn.Text = "Launch"
+                $btn.Size = New-Object System.Drawing.Size(120, 30)
+                $btn.Location = New-Object System.Drawing.Point(75, 90)
+                $btn.BackColor = [System.Drawing.Color]::FromArgb(90, 120, 180)
+                $btn.ForeColor = [System.Drawing.Color]::White
+                $btn.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
+                $btn.FlatStyle = 'Flat'
+                $btn.FlatAppearance.BorderSize = 0
+                $btn.Add_Click({ Start-Process $command })
+            
+                $card.Controls.AddRange(@($icon, $titleLabel, $descLabel, $btn))
+                return $card
+            }
+            
+            # Positioning layout
+            $startX = 20
+            $startY = 20
+            $gapX = 20
+            $gapY = 20
+            $cols = 3
+            $col = 0
+            $row = 0
+            
+            foreach ($tool in $utilities) {
+                $x = $startX + ($col * (270 + $gapX))
+                $y = $startY + ($row * (130 + $gapY))
+                $card = New-UtilityCard -title $tool.Title -description $tool.Desc -command $tool.Cmd -location ([System.Drawing.Point]::new($x, $y)) -iconPath $tool.Icon
+                $panel.Controls.Add($card)
+            
+                $col++
+                if ($col -ge $cols) {
+                    $col = 0
+                    $row++
+                }
+            }
+            
+            return $panel
 
-            $label = New-Object System.Windows.Forms.Label
-            $label.Text = "UTILITIES CONTENT HERE"
-            $label.ForeColor = [System.Drawing.Color]::White
-            $label.Font = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
-            $label.AutoSize = $true
-            $label.Location = [System.Drawing.Point]::new(50, 50)
-            $utilitiesPanel.Controls.Add($label)
-            $mainPanel.Controls.Add($utilitiesPanel)
         }
         "Apps" {
-            $appsPanel = New-Object System.Windows.Forms.Panel
-            $appsPanel.Dock = 'Fill'
-            $appsPanel.BackColor = [System.Drawing.Color]::FromArgb(35, 35, 55)
+            Add-Type -AssemblyName System.Windows.Forms
+            Add-Type -AssemblyName System.Drawing
+            
+            $panel = New-Object System.Windows.Forms.Panel
+            $panel.Size = [System.Drawing.Size]::new(920, 640)
+            $panel.BackColor = [System.Drawing.Color]::FromArgb(40, 40, 60)
+            
+            # Footer
+            $footer = New-Object System.Windows.Forms.Panel
+            $footer.Size = [System.Drawing.Size]::new(920, 60)
+            $footer.Location = [System.Drawing.Point]::new(0, 550)
+            $footer.BackColor = [System.Drawing.Color]::FromArgb(35, 35, 50)
+            $panel.Controls.Add($footer)
+            
+            # Content
+            $contentPanel = New-Object System.Windows.Forms.Panel
+            $contentPanel.Size = [System.Drawing.Size]::new(920, 550)
+            $contentPanel.Location = [System.Drawing.Point]::new(0, 0)
+            $contentPanel.BackColor = $panel.BackColor
+            $panel.Controls.Add($contentPanel)
+            
+            # Categories
+            $systemTools = @{"System Tools" = @("Process Explorer", "Autoruns", "MSI Afterburner", "HWMonitor", "CPU-Z", "GPU-Z", "Revo Uninstaller")}
+            
+            $categories = @{
+                "Package Managers"     = @("Chocolatey", "Scoop", "WingetUI")
+                "Debloat & Cleaners"   = @("TronScript", "O&O AppBuster", "BleachBit", "CCleaner")
+                "Browsers"             = @("Firefox", "Brave", "LibreWolf", "Edge", "Chrome")
+                "Optimizers"           = @("WizTree", "Patch My PC", "Glary Utilities", "Advanced SystemCare")
+                "Security & Fixes"     = @("Malwarebytes", "AdwCleaner", "DefenderUI", "MSRT", "FixWin10")
+                "Archivers"            = @("7-Zip", "PeaZip", "NanaZip")
+                "Image Tools"          = @("IrfanView", "Paint.NET", "ShareX", "XnView")
+                "Media Players"        = @("VLC", "MPV", "PotPlayer", "SMPlayer")
+                "File Tools"           = @("Everything", "FreeCommander", "Q-Dir", "FastCopy")
+                "Editors & Dev Tools"  = @("Notepad++", "Visual Studio Code", "Sublime Text", "WinMerge")
+                "Office & PDF"         = @("LibreOffice", "SumatraPDF", "Foxit Reader")
+            }
+            
+            $checkboxes = @{}
+            
+            # Split into 3 columns (excluding system tools)
+            $sorted = ($categories.GetEnumerator() | Sort-Object Name)
+            $total = $sorted.Count
+            $perCol = [Math]::Ceiling($total / 3)
+            
+            $columns = @(
+                $sorted[0..($perCol-1)],
+                $sorted[$perCol..(2*$perCol - 1)],
+                $sorted[(2*$perCol)..($total-1)]
+            )
+            
+            # Layout settings
+            $colWidth = 210
+            $startX = 10
+            $gapX = 10
+            $font = New-Object System.Drawing.Font("Segoe UI", 10)
+            $fontBold = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
+            
+            # Render 3 columns for general categories
+            for ($col = 0; $col -lt 3; $col++) {
+                $columnPanel = New-Object System.Windows.Forms.Panel
+                $columnPanel.Size = [System.Drawing.Size]::new($colWidth, 530)
+                $columnPanel.Location = [System.Drawing.Point]::new($startX + ($col * ($colWidth + $gapX)), 10)
+                $columnPanel.BackColor = $panel.BackColor
+            
+                $curY = 0
+                foreach ($cat in $columns[$col]) {
+                    $label = New-Object System.Windows.Forms.Label
+                    $label.Text = $cat.Key
+                    $label.ForeColor = [System.Drawing.Color]::White
+                    $label.Font = $fontBold
+                    $label.Location = [System.Drawing.Point]::new(5, $curY)
+                    $label.AutoSize = $true
+                    $columnPanel.Controls.Add($label)
+                    $curY += 25
+            
+                    foreach ($app in $cat.Value) {
+                        $chk = New-Object System.Windows.Forms.CheckBox
+                        $chk.Text = $app
+                        $chk.ForeColor = [System.Drawing.Color]::White
+                        $chk.Font = $font
+                        $chk.BackColor = $panel.BackColor
+                        $chk.Size = [System.Drawing.Size]::new($colWidth - 20, 22)
+                        $chk.Location = [System.Drawing.Point]::new(10, $curY)
+                        $columnPanel.Controls.Add($chk)
+                        $checkboxes[$app] = $chk
+                        $curY += 24
+                    }
+                    $curY += 10
+                }
+                $contentPanel.Controls.Add($columnPanel)
+            }
+            
+            # Render last column just for system tools
+            $sysPanel = New-Object System.Windows.Forms.Panel
+            $sysPanel.Size = [System.Drawing.Size]::new($colWidth, 530)
+            $sysPanel.Location = [System.Drawing.Point]::new($startX + (3 * ($colWidth + $gapX)), 10)
+            $sysPanel.BackColor = $panel.BackColor
+            
+            $curY = 0
+            foreach ($cat in $systemTools.GetEnumerator()) {
+                $label = New-Object System.Windows.Forms.Label
+                $label.Text = $cat.Key
+                $label.ForeColor = [System.Drawing.Color]::White
+                $label.Font = $fontBold
+                $label.Location = [System.Drawing.Point]::new(5, $curY)
+                $label.AutoSize = $true
+                $sysPanel.Controls.Add($label)
+                $curY += 25
+            
+                foreach ($app in $cat.Value) {
+                    $chk = New-Object System.Windows.Forms.CheckBox
+                    $chk.Text = $app
+                    $chk.ForeColor = [System.Drawing.Color]::White
+                    $chk.Font = $font
+                    $chk.BackColor = $panel.BackColor
+                    $chk.Size = [System.Drawing.Size]::new($colWidth - 20, 22)
+                    $chk.Location = [System.Drawing.Point]::new(10, $curY)
+                    $sysPanel.Controls.Add($chk)
+                    $checkboxes[$app] = $chk
+                    $curY += 24
+                }
+            }
+            
+            $contentPanel.Controls.Add($sysPanel)
+            
+            # Footer buttons
+            $footerBtns = @(
+                @{ Text = "Install/Update"; Color = "60,140,90"; Action = {
+                    $selected = $checkboxes.GetEnumerator() | Where-Object { $_.Value.Checked }
+                    foreach ($app in $selected) { Write-Host "Installing/Updating $($app.Key)..." }
+                }},
+                @{ Text = "Reinstall"; Color = "90,120,180"; Action = {
+                    $selected = $checkboxes.GetEnumerator() | Where-Object { $_.Value.Checked }
+                    foreach ($app in $selected) { Write-Host "Reinstalling $($app.Key)..." }
+                }},
+                @{ Text = "Uninstall"; Color = "180,60,60"; Action = {
+                    $selected = $checkboxes.GetEnumerator() | Where-Object { $_.Value.Checked }
+                    foreach ($app in $selected) { Write-Host "Uninstalling $($app.Key)..." }
+                }},
+                @{ Text = "Clear Data"; Color = "120,90,140"; Action = {
+                    $selected = $checkboxes.GetEnumerator() | Where-Object { $_.Value.Checked }
+                    foreach ($app in $selected) { Write-Host "Clearing data for $($app.Key)..." }
+                }},
+                @{ Text = "Clear Selection"; Color = "100,20,50"; Action = {
+                    $selected = $checkboxes.GetEnumerator() | Where-Object { $_.Value.Checked }
+                    foreach ($app in $selected) { Write-Host "Clearing data for $($app.Key)..." }
+                }}
+            )
+            
+            for ($i = 0; $i -lt $footerBtns.Count; $i++) {
+                $b = $footerBtns[$i]
+                $btn = New-Object System.Windows.Forms.Button
+                $btn.Text = $b.Text
+                $btn.Size = [System.Drawing.Size]::new(110, 30)
+                $btn.Location = [System.Drawing.Point]::new(20 + ($i * 140), 10)
+                $rgb = $b.Color -split ','
+                $btn.BackColor = [System.Drawing.Color]::FromArgb($rgb[0], $rgb[1], $rgb[2])
+                $btn.ForeColor = [System.Drawing.Color]::White
+                $btn.FlatStyle = 'Flat'
+                $btn.FlatAppearance.BorderSize = 0
+                $btn.Font = $fontBold
+                $btn.Add_Click($b.Action)
+                $footer.Controls.Add($btn)
+            }
+            
+            return $panel
 
-            $label = New-Object System.Windows.Forms.Label
-            $label.Text = "APPS CONTENT HERE"
-            $label.ForeColor = [System.Drawing.Color]::White
-            $label.Font = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
-            $label.AutoSize = $true
-            $label.Location = [System.Drawing.Point]::new(50, 50)
-            $appsPanel.Controls.Add($label)
-            $mainPanel.Controls.Add($appsPanel)
         }
         default {
             $defaultPanel = New-Object System.Windows.Forms.Panel
