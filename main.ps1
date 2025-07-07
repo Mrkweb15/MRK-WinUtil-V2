@@ -46,46 +46,43 @@ function Load-Tab {
     param([string]$tabName)
 
     $mainPanel.Controls.Clear()
-    $lblTitle.Text = "Optimizer | $($tabName.ToUpper()) | Under Develepment"
+    $lblTitle.Text = "Optimizer | $($tabName.ToUpper()) | Loading..."
 
     $loadingLabel = New-Object System.Windows.Forms.Label
     $loadingLabel.Text = "Loading $tabName..."
     $loadingLabel.ForeColor = [System.Drawing.Color]::White
     $loadingLabel.Font = New-Object System.Drawing.Font("Segoe UI", 14, [System.Drawing.FontStyle]::Bold)
     $loadingLabel.AutoSize = $true
-    $loadingLabel.Left = [int](($mainPanel.Width - 200) / 2)
-    $loadingLabel.Top = [int](($mainPanel.Height - 30) / 2)
+    $loadingLabel.Left = ($mainPanel.Width - 200) / 2
+    $loadingLabel.Top = ($mainPanel.Height - 30) / 2
     $mainPanel.Controls.Add($loadingLabel)
     $mainPanel.Refresh()
 
     Start-Sleep -Milliseconds 300
 
-    if ($tabFiles[$tabName] -ne $null) {
-        $file = $tabFiles[$tabName]
-        if (Test-Path $file) {
-            try {
-                if ($file -like 'http*') {
-                    $response = Invoke-WebRequest -Uri $file -UseBasicParsing
-                    $tabPanel = Invoke-Expression $response.Content
-                } elseif (Test-Path $file) {
-                    $tabPanel = & $file
-                } else {
-                    throw "File not found: $file"
-                }
-            
-                if ($tabPanel -is [System.Windows.Forms.Panel]) {
-                    $mainPanel.Controls.Clear()
-                    $tabPanel.Dock = 'Fill'
-                    $mainPanel.Controls.Add($tabPanel)
-                } else {
-                    [System.Windows.Forms.MessageBox]::Show("Tab '$tabName' did not return a valid Panel.", "Error", "OK", "Error")
-                }
-            } catch {
-                [System.Windows.Forms.MessageBox]::Show("Error loading tab '$tabName': $_", "Error", "OK", "Error")
-            }
+    $fileUrl = $tabFiles[$tabName]
+    if (-not $fileUrl) {
+        [System.Windows.Forms.MessageBox]::Show("No file URL configured for tab '$tabName'.", "Error", "OK", "Error")
+        return
+    }
+
+    try {
+        $code = Invoke-RestMethod -Uri $fileUrl -UseBasicParsing
+        $scriptBlock = [scriptblock]::Create($code)
+        $tabPanel = & $scriptBlock
+
+        if ($tabPanel -is [System.Windows.Forms.Panel]) {
+            $mainPanel.Controls.Clear()
+            $tabPanel.Dock = 'Fill'
+            $mainPanel.Controls.Add($tabPanel)
+            $lblTitle.Text = "Optimizer | $($tabName.ToUpper())"
         } else {
-            [System.Windows.Forms.MessageBox]::Show("File not found: $file", "Error", "OK", "Error")
+            throw "The loaded script did not return a Panel object."
         }
+    } catch {
+        $errorMsg = "Failed to load '$tabName' tab.`n`nDetails: $($_.Exception.Message)"
+        [System.Windows.Forms.MessageBox]::Show($errorMsg, "Load Error", "OK", "Error")
+        $lblTitle.Text = "Optimizer | $($tabName.ToUpper()) | Failed"
     }
 }
 
