@@ -64,7 +64,15 @@ function Load-Tab {
         $file = $tabFiles[$tabName]
         if (Test-Path $file) {
             try {
-                $tabPanel = & $file
+                if ($file -like 'http*') {
+                    $response = Invoke-WebRequest -Uri $file -UseBasicParsing
+                    $tabPanel = Invoke-Expression $response.Content
+                } elseif (Test-Path $file) {
+                    $tabPanel = & $file
+                } else {
+                    throw "File not found: $file"
+                }
+            
                 if ($tabPanel -is [System.Windows.Forms.Panel]) {
                     $mainPanel.Controls.Clear()
                     $tabPanel.Dock = 'Fill'
