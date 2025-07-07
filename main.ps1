@@ -2,15 +2,13 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 # ─── Tab file locations ─────────────────────────────────────────────────────
-$baseURL = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs"
-
 $tabFiles = [ordered]@{
-    "Dashboard" = "$baseURL/Dashboard.ps1"
-    "Tweaks"    = "$baseURL/Tweaks.ps1"
-    "Cleaner"   = "$baseURL/Cleaner.ps1"
-    "Backup"    = "$baseURL/Backup.ps1"
-    "Utilities" = "$baseURL/Utilities.ps1"
-    "Apps"      = "$baseURL/Apps.ps1"
+    "Dashboard" = ".\tabs\Dashboard.ps1"
+    "Tweaks"    = ".\tabs\Tweaks.ps1"
+    "Cleaner"   = ".\tabs\Cleaner.ps1"
+    "Backup"    = ".\tabs\Backup.ps1"
+    "Utilities" = ".\tabs\Utilities.ps1"
+    "Apps"      = ".\tabs\Apps.ps1"
 }
 
 # ─── Local icon paths ─────────────────────────────────────────────────────
@@ -46,7 +44,7 @@ function Load-Tab {
     param([string]$tabName)
 
     $mainPanel.Controls.Clear()
-    $lblTitle.Text = "Optimizer | $($tabName.ToUpper()) | Under Development"
+    $lblTitle.Text = "Optimizer | $($tabName.ToUpper()) | Under Develepment"
 
     $loadingLabel = New-Object System.Windows.Forms.Label
     $loadingLabel.Text = "Loading $tabName..."
@@ -60,24 +58,26 @@ function Load-Tab {
 
     Start-Sleep -Milliseconds 300
 
-    if ($tabFiles[$tabName]) {
+    if ($tabFiles[$tabName] -ne $null) {
         $file = $tabFiles[$tabName]
-        try {
-            $code = Invoke-RestMethod -Uri $file -UseBasicParsing
-            $tabPanel = Invoke-Expression $code
-            if ($tabPanel -is [System.Windows.Forms.Panel]) {
-                $mainPanel.Controls.Clear()
-                $tabPanel.Dock = 'Fill'
-                $mainPanel.Controls.Add($tabPanel)
-            } else {
-                [System.Windows.Forms.MessageBox]::Show("Tab '$tabName' did not return a valid Panel.", "Error", "OK", "Error")
+        if (Test-Path $file) {
+            try {
+                $tabPanel = & $file
+                if ($tabPanel -is [System.Windows.Forms.Panel]) {
+                    $mainPanel.Controls.Clear()
+                    $tabPanel.Dock = 'Fill'
+                    $mainPanel.Controls.Add($tabPanel)
+                } else {
+                    [System.Windows.Forms.MessageBox]::Show("Tab '$tabName' did not return a valid Panel.", "Error", "OK", "Error")
+                }
+            } catch {
+                [System.Windows.Forms.MessageBox]::Show("Error loading tab '$tabName': $_", "Error", "OK", "Error")
             }
-        } catch {
-            [System.Windows.Forms.MessageBox]::Show("Error loading tab '$tabName': $_", "Error", "OK", "Error")
+        } else {
+            [System.Windows.Forms.MessageBox]::Show("File not found: $file", "Error", "OK", "Error")
         }
     }
 }
-
 
 # ─── Main Form ─────────────────────────────────────────────────────
 $form = New-Object System.Windows.Forms.Form
