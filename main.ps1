@@ -2,7 +2,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 # ─── Tab file locations ─────────────────────────────────────────────────────
-$baseUrl = 'https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/refs/heads/main/tabs'
+$baseUrl = 'https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs'
 
 $tabFiles = [ordered]@{
     "Dashboard" = "$baseUrl/Dashboard.ps1"
