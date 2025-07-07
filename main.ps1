@@ -77,8 +77,10 @@ function Load-Tab {
 
     if ($tabFiles[$tabName]) {
         try {
-            $script = Invoke-RestMethod -Uri $tabFiles[$tabName] -UseBasicParsing
-            $tabPanel = Invoke-Expression $script
+            $tempFile = New-TemporaryFile
+            Invoke-WebRequest -Uri $tabFiles[$tabName] -OutFile $tempFile.FullName
+            $tabPanel = . $tempFile.FullName
+            Remove-Item $tempFile.FullName -Force
 
             if ($tabPanel -is [System.Windows.Forms.Panel]) {
                 $mainPanel.Controls.Clear()
@@ -92,6 +94,7 @@ function Load-Tab {
         }
     }
 }
+
 
 # ─── Create Main Form ─────────────────────────────────────────────────
 $form = New-Object System.Windows.Forms.Form
