@@ -2,15 +2,13 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 # ─── Tab file locations ─────────────────────────────────────────────────────
-$baseUrl = 'https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs'
-
 $tabFiles = [ordered]@{
-    "Dashboard" = "$baseUrl/Dashboard.ps1"
-    "Tweaks"    = "$baseUrl/Tweaks.ps1"
-    "Cleaner"   = "$baseUrl/Cleaner.ps1"
-    "Backup"    = "$baseUrl/Backup.ps1"
-    "Utilities" = "$baseUrl/Utilities.ps1"
-    "Apps"      = "$baseUrl/Apps.ps1"
+    "Dashboard" = ".\tabs\Dashboard.ps1"
+    "Tweaks"    = ".\tabs\Tweaks.ps1"
+    "Cleaner"   = ".\tabs\Cleaner.ps1"
+    "Backup"    = ".\tabs\Backup.ps1"
+    "Utilities" = ".\tabs\Utilities.ps1"
+    "Apps"      = ".\tabs\Apps.ps1"
 }
 
 # ─── Local icon paths ─────────────────────────────────────────────────────
@@ -46,43 +44,38 @@ function Load-Tab {
     param([string]$tabName)
 
     $mainPanel.Controls.Clear()
-    $lblTitle.Text = "Optimizer | $($tabName.ToUpper()) | Loading..."
+    $lblTitle.Text = "Optimizer | $($tabName.ToUpper()) | Under Develepment"
 
     $loadingLabel = New-Object System.Windows.Forms.Label
     $loadingLabel.Text = "Loading $tabName..."
     $loadingLabel.ForeColor = [System.Drawing.Color]::White
     $loadingLabel.Font = New-Object System.Drawing.Font("Segoe UI", 14, [System.Drawing.FontStyle]::Bold)
     $loadingLabel.AutoSize = $true
-    $loadingLabel.Left = ($mainPanel.Width - 200) / 2
-    $loadingLabel.Top = ($mainPanel.Height - 30) / 2
+    $loadingLabel.Left = [int](($mainPanel.Width - 200) / 2)
+    $loadingLabel.Top = [int](($mainPanel.Height - 30) / 2)
     $mainPanel.Controls.Add($loadingLabel)
     $mainPanel.Refresh()
 
     Start-Sleep -Milliseconds 300
 
-    $fileUrl = $tabFiles[$tabName]
-    if (-not $fileUrl) {
-        [System.Windows.Forms.MessageBox]::Show("No file URL configured for tab '$tabName'.", "Error", "OK", "Error")
-        return
-    }
-
-    try {
-        $code = Invoke-RestMethod -Uri $fileUrl -UseBasicParsing
-        $scriptBlock = [scriptblock]::Create($code)
-        $tabPanel = & $scriptBlock
-
-        if ($tabPanel -is [System.Windows.Forms.Panel]) {
-            $mainPanel.Controls.Clear()
-            $tabPanel.Dock = 'Fill'
-            $mainPanel.Controls.Add($tabPanel)
-            $lblTitle.Text = "Optimizer | $($tabName.ToUpper())"
+    if ($tabFiles[$tabName] -ne $null) {
+        $file = $tabFiles[$tabName]
+        if (Test-Path $file) {
+            try {
+                $tabPanel = & $file
+                if ($tabPanel -is [System.Windows.Forms.Panel]) {
+                    $mainPanel.Controls.Clear()
+                    $tabPanel.Dock = 'Fill'
+                    $mainPanel.Controls.Add($tabPanel)
+                } else {
+                    [System.Windows.Forms.MessageBox]::Show("Tab '$tabName' did not return a valid Panel.", "Error", "OK", "Error")
+                }
+            } catch {
+                [System.Windows.Forms.MessageBox]::Show("Error loading tab '$tabName': $_", "Error", "OK", "Error")
+            }
         } else {
-            throw "The loaded script did not return a Panel object."
+            [System.Windows.Forms.MessageBox]::Show("File not found: $file", "Error", "OK", "Error")
         }
-    } catch {
-        $errorMsg = "Failed to load '$tabName' tab.`n`nDetails: $($_.Exception.Message)"
-        [System.Windows.Forms.MessageBox]::Show($errorMsg, "Load Error", "OK", "Error")
-        $lblTitle.Text = "Optimizer | $($tabName.ToUpper()) | Failed"
     }
 }
 
