@@ -60,7 +60,21 @@ function Load-Tab {
 
     if ($tabFiles[$tabName] -ne $null) {
         $file = $tabFiles[$tabName]
-        if (Test-Path $file) {
+        if ($file -match '^https?://') {
+            try {
+                $code = Invoke-RestMethod $file
+                $tabPanel = Invoke-Expression $code
+                if ($tabPanel -is [System.Windows.Forms.Panel]) {
+                    $mainPanel.Controls.Clear()
+                    $tabPanel.Dock = 'Fill'
+                    $mainPanel.Controls.Add($tabPanel)
+                } else {
+                    [System.Windows.Forms.MessageBox]::Show("Tab '$tabName' did not return a valid Panel.", "Error", "OK", "Error")
+                }
+            } catch {
+                [System.Windows.Forms.MessageBox]::Show("Error loading tab '$tabName': $_", "Error", "OK", "Error")
+            }
+        } elseif (Test-Path $file) {
             try {
                 $tabPanel = & $file
                 if ($tabPanel -is [System.Windows.Forms.Panel]) {
@@ -77,6 +91,7 @@ function Load-Tab {
             [System.Windows.Forms.MessageBox]::Show("File not found: $file", "Error", "OK", "Error")
         }
     }
+
 }
 
 # ─── Main Form ─────────────────────────────────────────────────────
@@ -310,6 +325,7 @@ Set-ActiveNavButton ($sidebar.Controls | Where-Object { $_ -is [System.Windows.F
 
 # ─── Start GUI ─────────────────────────────────────────────────────
 [void]$form.ShowDialog()
+
 
 
 
