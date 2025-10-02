@@ -4,11 +4,11 @@ Add-Type -AssemblyName System.Drawing
 # ─── Tab file locations ─────────────────────────────────────────────────────
 $tabFiles = [ordered]@{
     "Dashboard" = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs/Dashboard.ps1"
-    "Tweaks"    = ".\tabs\Tweaks.ps1"
-    "Cleaner"   = ".\tabs\Cleaner.ps1"
-    "Backup"    = ".\tabs\Backup.ps1"
-    "Utilities" = ".\tabs\Utilities.ps1"
-    "Apps"      = ".\tabs\Apps.ps1"
+    "Tweaks"    = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs/Tweaks.ps1"
+    "Cleaner"   = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs/Cleaner.ps1"
+    "Backup"    = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs/Backup.ps1"
+    "Utilities" = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs/Utilities.ps1"
+    "Apps"      = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/main/tabs/Apps.ps1"
 }
 
 # ─── Local icon paths ─────────────────────────────────────────────────────
@@ -310,6 +310,7 @@ Set-ActiveNavButton ($sidebar.Controls | Where-Object { $_ -is [System.Windows.F
 
 # ─── Start GUI ─────────────────────────────────────────────────────
 [void]$form.ShowDialog()
+
 
 
 
