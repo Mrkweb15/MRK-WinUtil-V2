@@ -13,7 +13,7 @@ $tabFiles = [ordered]@{
 
 # ─── Local icon paths ─────────────────────────────────────────────────────
 $iconPaths = @{
-    "Dashboard" = ".\assets\icons\codepen.png"
+    "Dashboard" = "https://raw.githubusercontent.com/Mrkweb15/MRK-WinUtil-V2/refs/heads/main/\assets\icons\codepen.png"
     "Tweaks"    = ".\assets\icons\tweaks.png"
     "Cleaner"   = ".\assets\icons\cleaner.png"
     "Backup"    = ".\assets\icons\backup.png"
@@ -310,3 +310,4 @@ Set-ActiveNavButton ($sidebar.Controls | Where-Object { $_ -is [System.Windows.F
 
 # ─── Start GUI ─────────────────────────────────────────────────────
 [void]$form.ShowDialog()
+
